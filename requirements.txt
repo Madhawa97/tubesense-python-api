@@ -1,1 +1,4 @@
 fastapi[all]
+pydantic
+poe-api
+uvicorn

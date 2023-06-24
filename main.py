@@ -1,14 +1,31 @@
-from typing import Optional
-
 from fastapi import FastAPI
+from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+import poe
+import os
+
+token = os.getenv('POE_TOKEN')
+client = poe.Client(token)
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+class Body(BaseModel):
+    prompt: str
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}
+@app.post('/')
+def root(body:Body):
+
+    prompt = body.prompt
+    for chunk in client.send_message("a2", prompt):
+        pass
+    print(chunk["text"])
+
+    return chunk["text"]
